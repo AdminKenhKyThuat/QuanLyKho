@@ -3,44 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phần Mềm Bán Hàng & Quản Lý Kho Vật Tư Nông Nghiệp</title>
+    <title>Phần Mềm Bán Hàng & Quản Lý Kho</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; margin: 0; padding: 20px; }
+        body { background-color: #f4f6f9; margin: 0; padding: 10px; }
         .container { max-width: 1200px; margin: auto; }
-        h1 { color: #2e7d32; text-align: center; margin-bottom: 20px; }
+        h1 { color: #2e7d32; text-align: center; margin-bottom: 15px; font-size: 1.5rem; }
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        /* Bố cục mặc định trên máy tính: chia 2 cột */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e8f5e9; padding-bottom: 8px; margin-bottom: 12px; }
-        .card h2 { color: #1b5e20; margin: 0; font-size: 1.1rem; }
+        .card h2 { color: #1b5e20; margin: 0; font-size: 1.05rem; }
         
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.85rem; color: #333; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; color: #333; }
+        /* Tăng kích thước input, select trên điện thoại để dễ bấm (tránh bị zoom khi focus trên iOS) */
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         
-        .btn { background: #2e7d32; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn { background: #2e7d32; color: white; border: none; padding: 12px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; }
         .btn:hover { background: #1b5e20; }
         .btn-sell { background: #d32f2f; }
         .btn-sell:hover { background: #b71c1c; }
-        .btn-danger { background: #c62828; padding: 5px 10px; font-size: 0.8rem; width: auto; }
+        .btn-danger { background: #c62828; padding: 6px 10px; font-size: 0.8rem; width: auto; border-radius: 4px; color: white; border: none; cursor: pointer;}
         .btn-danger:hover { background: #8e0000; }
-        .btn-delete-row { background: #e53935; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+        .btn-delete-row { background: #e53935; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-delete-row:hover { background: #c62828; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        th, td { border: 1px solid #e0e0e0; padding: 8px; text-align: left; }
+        /* Tối ưu bảng hiển thị trên di động có thanh cuộn ngang mượt mà */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px 8px; text-align: left; }
         th { background-color: #e8f5e9; color: #1b5e20; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         
         .full-width { grid-column: span 2; }
-        .total-preview { background: #e8f5e9; padding: 10px; border-radius: 4px; font-size: 1rem; color: #1b5e20; font-weight: bold; text-align: right; margin-bottom: 12px; }
+        .total-preview { background: #e8f5e9; padding: 12px; border-radius: 6px; font-size: 1.1rem; color: #1b5e20; font-weight: bold; text-align: right; margin-bottom: 12px; }
+
+        /* 📱 RESPONSIVE CHO ĐIỆN THOẠI (Màn hình dưới 768px) */
+        @media screen and (max-width: 768px) {
+            body { padding: 5px; }
+            .grid { grid-template-columns: 1fr; gap: 10px; } /* Chuyển thành 1 cột dọc */
+            .full-width { grid-column: span 1; }
+            h1 { font-size: 1.25rem; }
+            .card { padding: 12px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>QUẢN LÝ KHO & BÁN HÀNG VẬT TƯ NÔNG NGHIỆP</h1>
+    <h1>QUẢN LÝ KHO & BÁN HÀNG VẬT TƯ</h1>
     
     <div class="grid">
         <!-- 1. Form Nhập Sản Phẩm -->
@@ -51,7 +64,7 @@
             <form id="addProductForm">
                 <div class="form-group">
                     <label>Tên sản phẩm / Thuốc</label>
-                    <input type="text" id="addName" placeholder="VD: NPK 16-16-8, Anvil..." required>
+                    <input type="text" id="addName" placeholder="VD: NPK, Anvil..." required>
                 </div>
                 <div class="form-group">
                     <label>Đơn vị tính</label>
@@ -65,21 +78,21 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Số lượng có sẵn (Tồn kho)</label>
+                    <label>Số lượng tồn kho</label>
                     <input type="number" id="addQty" min="0" value="10" required>
                 </div>
                 <div class="form-group">
                     <label>Giá bán (VNĐ)</label>
                     <input type="number" id="addPrice" placeholder="VD: 150000" required>
                 </div>
-                <button type="submit" class="btn">Thêm Vào Kho & Đồng Bộ GG Sheet</button>
+                <button type="submit" class="btn">Thêm Vào Kho & Đồng Bộ Sheet</button>
             </form>
         </div>
 
         <!-- 2. Giao diện Bán Hàng -->
         <div class="card">
             <div class="card-header">
-                <h2>2. Giao Diện Bán Hàng (Xuất Kho)</h2>
+                <h2>2. Giao Diện Bán Hàng</h2>
             </div>
             <form id="sellForm">
                 <div class="form-group">
@@ -100,7 +113,7 @@
                     Tổng tiền: 0 đ
                 </div>
 
-                <button type="submit" class="btn btn-sell">Bán Hàng & Đẩy Lên GG Sheet</button>
+                <button type="submit" class="btn btn-sell">Bán Hàng & Đẩy Lên Sheet</button>
             </form>
         </div>
     </div>
@@ -110,16 +123,16 @@
         <div class="card-header">
             <h2>3. Bảng Tồn Kho Hiện Tại</h2>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="table-responsive">
             <table id="inventoryTable">
                 <thead>
                     <tr>
-                        <th>Mã SP</th>
+                        <th>Mã</th>
                         <th>Tên sản phẩm</th>
                         <th>ĐVT</th>
-                        <th>Số lượng tồn</th>
-                        <th>Giá bán lẻ</th>
-                        <th>Thành tiền tồn kho</th>
+                        <th>Tồn</th>
+                        <th>Giá bán</th>
+                        <th>Thành tiền</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
@@ -131,19 +144,19 @@
     <!-- 4. Lịch Sử Giao Dịch Bán Hàng -->
     <div class="card full-width">
         <div class="card-header">
-            <h2>4. Lịch Sử Bán Hàng & Doanh Thu</h2>
-            <button class="btn btn-danger" onclick="clearHistory()">Xóa Toàn Bộ Lịch Sử</button>
+            <h2>4. Lịch Sử Bán Hàng</h2>
+            <button class="btn-danger" onclick="clearHistory()">Xóa Lịch Sử</button>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="table-responsive">
             <table id="historyTable">
                 <thead>
                     <tr>
                         <th>Thời gian</th>
                         <th>Khách hàng</th>
                         <th>Sản phẩm</th>
-                        <th>Số lượng bán</th>
+                        <th>SL</th>
                         <th>Đơn giá</th>
-                        <th>Tổng tiền thanh toán</th>
+                        <th>Tổng tiền</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -153,11 +166,11 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmfao-aH6RUm6t-8UBiEWOlDjtixg4TMO_wMBv_8-27yACVDXFZAzM7gXurlLC0nq1AA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmfao-aH6RUm6t-8UBiEWOLDjtixg4TMO_wMBv_8-27yACVDXFZAZM7gXurlLC0nq1AA/exec";
 
     let inventory = JSON.parse(localStorage.getItem('agri_stock')) || [
-        { id: 'SP001', name: 'Phân Bón NPK 16-16-8 Đầu Trâu', unit: 'Bao', qty: 50, price: 550000 },
-        { id: 'SP002', name: 'Thuốc BVTV Anvil 5SC (Chai 250ml)', unit: 'Chai', qty: 30, price: 120000 },
+        { id: 'SP001', name: 'Phân Bón NPK 16-16-8', unit: 'Bao', qty: 50, price: 550000 },
+        { id: 'SP002', name: 'Thuốc BVTV Anvil 250ml', unit: 'Chai', qty: 30, price: 120000 },
         { id: 'SP003', name: 'Thuốc Trừ Sâu Regent', unit: 'Gói', qty: 100, price: 22000 }
     ];
 
@@ -175,7 +188,7 @@
         sellProductSelect.innerHTML = '<option value="">-- Chọn sản phẩm cần bán --</option>';
 
         if (inventory.length === 0) {
-            inventoryTable.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #777;">Kho hiện đang trống.</td></tr>`;
+            inventoryTable.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #777;">Kho trống.</td></tr>`;
         } else {
             inventory.forEach((item, index) => {
                 const row = document.createElement('tr');
@@ -200,7 +213,7 @@
 
         historyTable.innerHTML = '';
         if (salesHistory.length === 0) {
-            historyTable.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777;">Chưa có lịch sử giao dịch nào.</td></tr>`;
+            historyTable.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777;">Chưa có giao dịch.</td></tr>`;
         } else {
             salesHistory.slice().reverse().forEach(record => {
                 const hRow = document.createElement('tr');
@@ -221,20 +234,12 @@
         calculateTotal();
     }
 
-    // Hàm xóa sản phẩm khỏi kho
     function deleteProduct(index) {
         const productName = inventory[index].name;
-        if (confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}" khỏi kho không?`)) {
+        if (confirm(`Xóa sản phẩm "${productName}" khỏi kho?`)) {
             inventory.splice(index, 1);
             updateUI();
-
-            // Đồng bộ dữ liệu kho mới lên Google Sheets
-            sendToGoogleSheets({
-                action: "updateInventory",
-                inventory: inventory
-            });
-
-            alert('Đã xóa sản phẩm thành công!');
+            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
         }
     }
 
@@ -250,7 +255,7 @@
 
     function clearHistory() {
         if (salesHistory.length === 0) return;
-        if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử bán hàng không?')) {
+        if (confirm('Xóa toàn bộ lịch sử bán hàng?')) {
             salesHistory = [];
             localStorage.removeItem('agri_history');
             updateUI();
@@ -289,20 +294,15 @@
 
         updateUI();
         addProductForm.reset();
-
-        sendToGoogleSheets({
-            action: "updateInventory",
-            inventory: inventory
-        });
-
-        alert('Đã cập nhật kho & đẩy dữ liệu lên Google Sheets!');
+        sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+        alert('Đã cập nhật kho thành công!');
     });
 
     sellForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const productIndex = sellProductSelect.value;
         if (productIndex === "") {
-            alert('Vui lòng chọn sản phẩm cần bán!');
+            alert('Vui lòng chọn sản phẩm!');
             return;
         }
 
@@ -311,7 +311,7 @@
         let selectedItem = inventory[productIndex];
 
         if (selectedItem.qty < sellQty) {
-            alert(`Không đủ hàng trong kho! Tồn kho hiện tại chỉ còn: ${selectedItem.qty} ${selectedItem.unit}`);
+            alert(`Không đủ hàng! Tồn kho chỉ còn: ${selectedItem.qty} ${selectedItem.unit}`);
             return;
         }
 
@@ -334,16 +334,10 @@
         salesHistory.push(newSale);
         updateUI();
 
-        sendToGoogleSheets({
-            action: "addSale",
-            sale: newSale
-        });
-        sendToGoogleSheets({
-            action: "updateInventory",
-            inventory: inventory
-        });
+        sendToGoogleSheets({ action: "addSale", sale: newSale });
+        sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
 
-        alert(`Bán hàng thành công!\n- Tổng tiền: ${totalMoney.toLocaleString('vi-VN')} đ\n\n(Dữ liệu đã tự động trừ kho & lưu lên Google Sheets)`);
+        alert(`Bán thành công! Tổng tiền: ${totalMoney.toLocaleString('vi-VN')} đ`);
 
         document.getElementById('customerName').value = '';
         document.getElementById('sellQty').value = 1;
