@@ -3,482 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phần Mềm Bán Hàng & Quản Lý Kho</title>
+    <title>Quản Lý Kho & Bán Hàng Vật Tư Nông Nghiệp</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'farm-forest': '#1b4332',     /* Xanh rừng đậm */
+                        'farm-deep': '#2d6a4f',       /* Xanh lá đậm */
+                        'farm-leaf': '#52b788',       /* Xanh lá mạ tươi */
+                        'farm-sprout': '#74c69d',     /* Xanh mầm lá */
+                        'farm-softgreen': '#d8f3dc',  /* Xanh lá nhạt nền */
+                        'farm-earth': '#b76935',      /* Màu đất ấm / Terracotta */
+                        'farm-earth-dark': '#8c4318', /* Đất đậm */
+                        'farm-sand': '#fefae0',       /* Kem kem ấm / Sand */
+                        'farm-cream': '#f4f6f0',      /* Nền xám kem tự nhiên */
+                        'farm-alert': '#d90429',      /* Cảnh báo đỏ sỏi */
+                    },
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; margin: 0; padding: 10px; }
-        .container { max-width: 900px; margin: auto; }
-        h1 { color: #2e7d32; text-align: center; margin-bottom: 15px; font-size: 1.5rem; }
-        
-        /* 📊 CSS CHO 3 Ô THỐNG KÊ NGANG */
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+        body {
+            background-color: #f4f6f0;
+            background-image: radial-gradient(#d8f3dc 0.8px, transparent 0.8px);
+            background-size: 16px 16px;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            color: #1b4332;
         }
-        .stat-card {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            text-align: center;
-            border-left: 4px solid #2e7d32;
-        }
-        .stat-card:nth-child(2) { border-left-color: #1976d2; }
-        .stat-card:nth-child(3) { border-left-color: #d32f2f; }
-        .stat-title { font-size: 0.8rem; color: #666; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        .stat-value { font-size: 1.2rem; font-weight: bold; color: #333; }
 
-        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e8f5e9; padding-bottom: 8px; margin-bottom: 12px; }
-        .card h2 { color: #1b5e20; margin: 0; font-size: 1.05rem; }
-        
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; color: #333; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        
-        .btn { background: #2e7d32; color: white; border: none; padding: 12px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; }
-        .btn:hover { background: #1b5e20; }
-        .btn-sell { background: #d32f2f; }
-        .btn-sell:hover { background: #b71c1c; }
-        .btn-danger { background: #c62828; padding: 6px 10px; font-size: 0.8rem; width: auto; border-radius: 4px; color: white; border: none; cursor: pointer;}
-        .btn-danger:hover { background: #8e0000; }
-        .btn-delete-row { background: #e53935; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-        .btn-delete-row:hover { background: #c62828; }
-        
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
-        th, td { border: 1px solid #e0e0e0; padding: 10px 8px; text-align: left; }
-        th { background-color: #e8f5e9; color: #1b5e20; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        
-        .full-width { grid-column: span 1; }
-        .total-preview { background: #e8f5e9; padding: 12px; border-radius: 6px; font-size: 1.1rem; color: #1b5e20; font-weight: bold; text-align: right; margin-bottom: 12px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f6f0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #74c69d;
+            border-radius: 999px;
+        }
 
-        /* Modal Mật Khẩu */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;
-            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        .leaf-card {
+            background: #ffffff;
+            border: 1px solid #d8f3dc;
+            box-shadow: 0 4px 15px -2px rgba(27, 67, 50, 0.05);
         }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box {
-            background: white; width: 90%; max-width: 400px; padding: 20px;
-            border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            transform: translateY(-20px); transition: transform 0.3s ease;
-        }
-        .modal-overlay.active .modal-box { transform: translateY(0); }
-        .modal-box h3 { margin-top: 0; color: #1b5e20; font-size: 1.2rem; margin-bottom: 10px; }
-        .modal-box p { font-size: 0.9rem; color: #555; margin-bottom: 15px; }
-        .modal-box input {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;
-            font-size: 1rem; margin-bottom: 15px; outline: none;
-        }
-        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; }
-        .modal-btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; font-size: 0.9rem; }
-        .modal-btn-cancel { background: #e0e0e0; color: #333; }
-        .modal-btn-confirm { background: #2e7d32; color: white; }
 
-        @media screen and (max-width: 768px) {
-            body { padding: 5px; }
-            h1 { font-size: 1.25rem; }
-            .card { padding: 12px; }
-            .dashboard-stats { gap: 6px; }
-            .stat-card { padding: 8px 4px; }
-            .stat-title { font-size: 0.7rem; }
-            .stat-value { font-size: 1rem; }
+        .glow-sprout {
+            box-shadow: 0 0 15px rgba(82, 183, 136, 0.25);
+        }
+
+        /* Smooth Transition */
+        .transition-all-custom {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen pb-12 antialiased selection:bg-farm-leaf selection:text-white">
 
-<div class="container">
-    <h1>QUẢN LÝ KHO & BÁN HÀNG VẬT TƯ</h1>
-    
-    <!-- 3 Ô THỐNG KÊ NGANG TRÊN CÙNG -->
-    <div class="dashboard-stats">
-        <div class="stat-card">
-            <div class="stat-title">Số Sản Phẩm</div>
-            <div class="stat-value" id="statTotalProducts">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Tổng Tồn Kho</div>
-            <div class="stat-value" id="statTotalQty">0</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Đơn Đã Bán</div>
-            <div class="stat-value" id="statTotalSales">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <!-- 1. Giao diện Bán Hàng -->
-        <div class="card">
-            <div class="card-header">
-                <h2>1. Giao Diện Bán Hàng (Xuất Kho)</h2>
-            </div>
-            <form id="sellForm">
-                <div class="form-group">
-                    <label>Chọn sản phẩm bán</label>
-                    <select id="sellProductSelect" required onchange="calculateTotal()">
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Số lượng bán</label>
-                    <input type="number" id="sellQty" min="1" value="1" required oninput="calculateTotal()">
-                </div>
-                <div class="form-group">
-                    <label>Tên khách hàng (Tùy chọn)</label>
-                    <input type="text" id="customerName" placeholder="VD: Chú Ba Lúa">
-                </div>
-                
-                <div class="total-preview" id="totalPreview">
-                    Tổng tiền: 0 đ
-                </div>
-
-                <button type="submit" class="btn btn-sell">Bán Hàng & Đẩy Lên GG Sheet</button>
-            </form>
-        </div>
-
-        <!-- 2. Form Nhập Sản Phẩm -->
-        <div class="card">
-            <div class="card-header">
-                <h2>2. Thêm Sản Phẩm / Nhập Kho (Yêu cầu mật khẩu)</h2>
-            </div>
-            <form id="addProductForm">
-                <div class="form-group">
-                    <label>Tên sản phẩm / Thuốc</label>
-                    <input type="text" id="addName" placeholder="VD: NPK 16-16-8, Anvil..." required>
-                </div>
-                <div class="form-group">
-                    <label>Đơn vị tính</label>
-                    <select id="addUnit">
-                        <option value="Bao">Bao</option>
-                        <option value="Chai">Chai</option>
-                        <option value="Gói">Gói</option>
-                        <option value="Can/Xô">Can / Xô</option>
-                        <option value="Kg">Kg</option>
-                        <option value="Lít">Lít</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Số lượng có sẵn (Tồn kho)</label>
-                    <input type="number" id="addQty" min="0" value="10" required>
-                </div>
-                <div class="form-group">
-                    <label>Giá bán (VNĐ)</label>
-                    <input type="number" id="addPrice" placeholder="VD: 150000" required>
-                </div>
-                <button type="submit" class="btn">Thêm Vào Kho & Đồng Bộ GG Sheet</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 3. Bảng Kiểm Tra Tồn Kho -->
-    <div class="card full-width">
-        <div class="card-header">
-            <h2>3. Bảng Tồn Kho Hiện Tại</h2>
-        </div>
-        <div class="table-responsive">
-            <table id="inventoryTable">
-                <thead>
-                    <tr>
-                        <th>Mã</th>
-                        <th>Tên sản phẩm</th>
-                        <th>ĐVT</th>
-                        <th>Tồn</th>
-                        <th>Giá bán</th>
-                        <th>Thành tiền</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 4. Lịch Sử Giao Dịch Bán Hàng -->
-    <div class="card full-width">
-        <div class="card-header">
-            <h2>4. Lịch Sử Bán Hàng</h2>
-            <button class="btn-danger" onclick="confirmClearHistory()">Xóa Lịch Sử</button>
-        </div>
-        <div class="table-responsive">
-            <table id="historyTable">
-                <thead>
-                    <tr>
-                        <th>Thời gian</th>
-                        <th>Khách hàng</th>
-                        <th>Sản phẩm</th>
-                        <th>SL</th>
-                        <th>Đơn giá</th>
-                        <th>Tổng tiền</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Mật Khẩu -->
-<div class="modal-overlay" id="passwordModal">
-    <div class="modal-box">
-        <h3 id="modalTitle">Xác nhận mật khẩu</h3>
-        <p id="modalDesc">Vui lòng nhập mật khẩu quản trị:</p>
-        <input type="password" id="modalPasswordInput" placeholder="Nhập mật khẩu...">
-        <div class="modal-buttons">
-            <button class="modal-btn modal-btn-cancel" onclick="closePasswordModal()">Hủy</button>
-            <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Xác nhận</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxpXXjwBu2jw-JXn686tCI5gpP7z4Okh7H4E35JlBh_C390Bq6c7i0ctbJVJDkVorfVw/exec";
-    const ADMIN_PASSWORD = "123456";
-
-    let inventory = [];
-    let salesHistory = JSON.parse(localStorage.getItem('agri_history')) || [];
-
-    const addProductForm = document.getElementById('addProductForm');
-    const sellForm = document.getElementById('sellForm');
-    const inventoryTable = document.getElementById('inventoryTable').querySelector('tbody');
-    const historyTable = document.getElementById('historyTable').querySelector('tbody');
-    const sellProductSelect = document.getElementById('sellProductSelect');
-    const totalPreview = document.getElementById('totalPreview');
-
-    const modal = document.getElementById('passwordModal');
-    const modalInput = document.getElementById('modalPasswordInput');
-    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDesc = document.getElementById('modalDesc');
-
-    // Các thẻ hiển thị số liệu thống kê
-    const statTotalProducts = document.getElementById('statTotalProducts');
-    const statTotalQty = document.getElementById('statTotalQty');
-    const statTotalSales = document.getElementById('statTotalSales');
-
-    function loadDataFromGoogleSheets() {
-        fetch(GOOGLE_SCRIPT_URL)
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    inventory = data;
-                    updateUI();
-                }
-            })
-            .catch(err => {
-                console.error("Không thể tải dữ liệu từ Google Sheets:", err);
-                inventory = JSON.parse(localStorage.getItem('agri_stock')) || [];
-                updateUI();
-            });
-    }
-
-    function showPasswordModal(title, desc, callback) {
-        modalTitle.textContent = title;
-        modalDesc.textContent = desc;
-        modalInput.value = "";
-        modal.classList.add('active');
-        modalInput.focus();
-
-        const newConfirmBtn = modalConfirmBtn.cloneNode(true);
-        modalConfirmBtn.parentNode.replaceChild(newConfirmBtn, modalConfirmBtn);
-
-        newConfirmBtn.addEventListener('click', function() {
-            if (modalInput.value === ADMIN_PASSWORD) {
-                closePasswordModal();
-                callback(true);
-            } else {
-                alert("Sai mật khẩu quản trị!");
-                modalInput.focus();
-            }
-        });
-
-        modalInput.onkeydown = function(e) {
-            if (e.key === 'Enter') newConfirmBtn.click();
-        };
-    }
-
-    function closePasswordModal() {
-        modal.classList.remove('active');
-        modalInput.value = "";
-    }
-
-    function updateUI() {
-        inventoryTable.innerHTML = '';
-        sellProductSelect.innerHTML = '<option value="">-- Chọn sản phẩm cần bán --</option>';
-
-        let totalQtySum = 0;
-
-        if (inventory.length === 0) {
-            inventoryTable.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #777;">Kho trống.</td></tr>`;
-        } else {
-            inventory.forEach((item, index) => {
-                const qtyNum = Number(item.qty) || 0;
-                totalQtySum += qtyNum;
-
-                const row = document.createElement('tr');
-                const totalValue = qtyNum * Number(item.price);
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td><strong>${item.name}</strong></td>
-                    <td>${item.unit}</td>
-                    <td><strong style="color: ${qtyNum <= 5 ? 'red' : 'green'};">${qtyNum}</strong></td>
-                    <td>${Number(item.price).toLocaleString('vi-VN')} đ</td>
-                    <td>${Number(totalValue).toLocaleString('vi-VN')} đ</td>
-                    <td><button class="btn-delete-row" onclick="requestDeleteProduct(${index})">Xóa</button></td>
-                `;
-                inventoryTable.appendChild(row);
-
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${item.name} (Còn: ${qtyNum} ${item.unit}) - Giá: ${Number(item.price).toLocaleString('vi-VN')}đ`;
-                sellProductSelect.appendChild(option);
-            });
-        }
-
-        // Cập nhật giá trị lên 3 ô thống kê phía trên
-        statTotalProducts.textContent = inventory.length;
-        statTotalQty.textContent = totalQtySum.toLocaleString('vi-VN');
-        statTotalSales.textContent = salesHistory.length.toLocaleString('vi-VN');
-
-        historyTable.innerHTML = '';
-        if (salesHistory.length === 0) {
-            historyTable.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #777;">Chưa có giao dịch.</td></tr>`;
-        } else {
-            salesHistory.slice().reverse().forEach(record => {
-                const hRow = document.createElement('tr');
-                hRow.innerHTML = `
-                    <td>${record.time}</td>
-                    <td>${record.customer}</td>
-                    <td><strong>${record.productName}</strong></td>
-                    <td>${record.qty} ${record.unit}</td>
-                    <td>${Number(record.price).toLocaleString('vi-VN')} đ</td>
-                    <td><strong style="color: #2e7d32;">${Number(record.totalMoney).toLocaleString('vi-VN')} đ</strong></td>
-                `;
-                historyTable.appendChild(hRow);
-            });
-        }
-
-        localStorage.setItem('agri_stock', JSON.stringify(inventory));
-        localStorage.setItem('agri_history', JSON.stringify(salesHistory));
-        calculateTotal();
-    }
-
-    function requestDeleteProduct(index) {
-        showPasswordModal("Xác thực xóa sản phẩm", "Nhập mật khẩu quản trị để xóa sản phẩm này:", function() {
-            inventory.splice(index, 1);
-            updateUI();
-            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
-        });
-    }
-
-    function confirmClearHistory() {
-        if (salesHistory.length === 0) return;
-        showPasswordModal("Xác thực xóa lịch sử", "Nhập mật khẩu quản trị để xóa toàn bộ lịch sử:", function() {
-            salesHistory = [];
-            localStorage.removeItem('agri_history');
-            updateUI();
-            sendToGoogleSheets({ action: "clearHistory" });
-        });
-    }
-
-    function sendToGoogleSheets(payload) {
-        if (!GOOGLE_SCRIPT_URL) return;
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        }).catch(err => console.error("Lỗi đồng bộ:", err));
-    }
-
-    function calculateTotal() {
-        const productIndex = sellProductSelect.value;
-        const sellQty = parseInt(document.getElementById('sellQty').value) || 0;
-
-        if (productIndex === "" || !inventory[productIndex]) {
-            totalPreview.textContent = "Tổng tiền: 0 đ";
-            return;
-        }
-
-        const selectedItem = inventory[productIndex];
-        const total = selectedItem.price * sellQty;
-        totalPreview.textContent = `Tổng tiền: ${total.toLocaleString('vi-VN')} đ`;
-    }
-
-    addProductForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        showPasswordModal("Xác thực nhập kho", "Nhập mật khẩu quản trị để thêm/nhập kho:", function() {
-            const name = document.getElementById('addName').value;
-            const unit = document.getElementById('addUnit').value;
-            const qty = parseInt(document.getElementById('addQty').value);
-            const price = parseFloat(document.getElementById('addPrice').value);
-
-            const existingProduct = inventory.find(item => item.name.toLowerCase() === name.toLowerCase() && item.unit === unit);
-            if (existingProduct) {
-                existingProduct.qty += qty;
-                existingProduct.price = price;
-            } else {
-                const newId = 'SP' + String(inventory.length + 1).padStart(3, '0');
-                inventory.push({ id: newId, name, unit, qty, price });
-            }
-
-            updateUI();
-            addProductForm.reset();
-            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
-        });
-    });
-
-    sellForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const productIndex = sellProductSelect.value;
-        if (productIndex === "") {
-            alert('Vui lòng chọn sản phẩm!');
-            return;
-        }
-
-        const sellQty = parseInt(document.getElementById('sellQty').value);
-        const customer = document.getElementById('customerName').value || 'Khách lẻ';
-        let selectedItem = inventory[productIndex];
-
-        if (selectedItem.qty < sellQty) {
-            alert(`Không đủ hàng! Tồn kho chỉ còn: ${selectedItem.qty} ${selectedItem.unit}`);
-            return;
-        }
-
-        selectedItem.qty -= sellQty;
-        const totalMoney = sellQty * selectedItem.price;
-
-        const now = new Date();
-        const timeString = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
+    <div class="max-w-2xl mx-auto px-3 sm:px-4 py-4 space-y-4">
         
-        const newSale = {
-            time: timeString,
-            customer: customer,
-            productName: selectedItem.name,
-            unit: selectedItem.unit,
-            qty: sellQty,
-            price: selectedItem.price,
-            totalMoney: totalMoney
-        };
+        <!-- HEADER -->
+        <header class="leaf-card rounded-2xl p-4 sm:p-5 text-center relative overflow-hidden border-b-4 border-b-farm-leaf">
+            <div class="absolute -top-6 -right-6 w-20 h-20 bg-farm-softgreen rounded-full blur-xl opacity-70 pointer-events-none"></div>
+            <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-farm-sand rounded-full blur-xl opacity-70 pointer-events-none"></div>
 
-        salesHistory.push(newSale);
-        updateUI();
+            <div class="inline-flex items-center justify-center p-2.5 bg-farm-softgreen/60 rounded-full mb-2 text-farm-forest">
+                <!-- SVG Icon Mầm cây Nông Nghiệp -->
+                <svg class="w-7 h-7 text-farm-deep" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7-8-3.134-8-7z" opacity="0.3"></path>
+                </svg>
+            </div>
+            
+            <h1 class="text-lg sm:text-xl font-extrabold text-farm-forest tracking-tight uppercase leading-snug">
+                Nông Nghiệp Xanh
+            </h1>
+            <p class="text-xs sm:text-sm font-semibold text-farm-deep/80 mt-0.5">
+                Quản Lý Kho & Bán Hàng Vật Tư
+            </p>
+        </header>
 
-        sendToGoogleSheets({ action: "addSale", sale: newSale });
-        sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+        <!-- DASHBOARD (3 CARDS NGANG) -->
+        <section class="grid grid-cols-3 gap-2 sm:gap-3">
+            <!-- Card 1: Số Sản Phẩm -->
+            <div class="leaf-card rounded-xl p-3 text-center border-l-4 border-l-farm-forest relative overflow-hidden">
+                <span class="block text-[10px] sm:text-xs font-bold text-farm-forest/70 uppercase tracking-wider">Mặt hàng</span>
+                <span id="statTotalProducts" class="text-lg sm:text-2xl font-black text-farm-forest tracking-tight mt-0.5 block">0</span>
+                <div class="text-[9px] text-farm-deep/60 mt-0.5 font-medium">Trong kho</div>
+            </div>
 
-        document.getElementById('customerName').value = '';
-        document.getElementById('sellQty').value = 1;
-    });
+            <!-- Card 2: Tổng Tồn Kho -->
+            <div class="leaf-card rounded-xl p-3 text-center border-l-4 border-l-farm-leaf relative overflow-hidden">
+                <span class="block text-[10px] sm:text-xs font-bold text-farm-deep uppercase tracking-wider">Tổng tồn</span>
+                <span id="statTotalQty" class="text-lg sm:text-2xl font-black text-farm-deep tracking-tight mt-0.5 block">0</span>
+                <div class="text-[9px] text-farm-deep/60 mt-0.5 font-medium">Sản phẩm</div>
+            </div>
 
-    loadDataFromGoogleSheets();
-</script>
+            <!-- Card 3: Số Đơn Đã Bán -->
+            <div class="leaf-card rounded-xl p-3 text-center border-l-4 border-l-farm-earth relative overflow-hidden">
+                <span class="block text-[10px] sm:text-xs font-bold text-farm-earth uppercase tracking-wider">Đơn bán</span>
+                <span id="statTotalSales" class="text-lg sm:text-2xl font-black text-farm-earth tracking-tight mt-0.5 block">0</span>
+                <div class="text-[9px] text-farm-earth/70 mt-0.5 font-medium">Đã xuất</div>
+            </div>
+        </section>
 
+        <!-- GIAO DIỆN CHÍNH (1 CỘT DỌC) -->
+        <main class="space-y-4">
+            
+            <!-- 1. GIAO DIỆN BÁN HÀNG -->
+            <section class="leaf-card rounded-2xl p-4 sm:p-5 relative">
+                <div class="flex items-center gap-2 border-b border-farm-softgreen pb-3 mb-4">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-farm-earth/10 text-farm-earth font-bold text-sm">1</span>
+                    <h2 class="text-base font-bold text-farm-forest uppercase tracking-wide">Xuất Kho & Bán Hàng</h2>
+                </div>
+
+                <form id="sellForm" class="space-y-3.5">
+                    <div>
+                        <label class="block text-xs font-bold text-farm-forest/90 mb-1">Chọn sản phẩm cần bán *</label>
+                        <select id="sellProductSelect" required onchange="calculateTotal()" class="w-full bg-farm-sand/40 border border-farm-sprout/60 rounded-xl px-3 py-2.5 text-sm text-farm-forest focus:outline-none focus:ring-2 focus:ring-farm-leaf focus:bg-white transition-all-custom font-medium">
+                            <option value="">-- Đang tải sản phẩm... --</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-farm-forest/90 mb-1">Số lượng xuất *</label>
+                            <input type="number" id="sellQty" min="1" value="1" required oninput="calculateTotal()" class="w-full bg-farm-sand/40 border border-farm-sprout/60 rounded-xl px-3 py-2.5 text-sm text-farm-forest focus:outline-none focus:ring-2 focus:ring-farm-leaf focus:bg-white transition-all-custom font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-farm-forest/90 mb-1">Tên khách hàng</label>
+                            <input type="text" id="customerName" placeholder="VD: Anh Tám, Khách lẻ..." class="w-full bg-farm-sand/40 border border-farm-sprout/60 rounded-xl px-3 py-2.5 text-sm text-farm-forest placeholder:text-farm-forest/30 focus:outline-none focus:ring-2 focus:ring-farm-leaf focus:bg-white transition-all-custom">
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW TỔNG TIỀN -->
+                    <div class="bg-gradient-to-r from-farm-softgreen/80 to-farm-sand p-3.5 rounded-xl border border-farm-sprout/40 flex justify-between items-center shadow-inner">
+                        <span class="text-xs font-bold text-farm-deep uppercase tracking-wide">Thành tiền:</span>
+                        <span id="totalPreview" class="text-lg sm:text-xl font-black text-farm-forest">0 đ</span>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-farm-earth to-farm-earth-dark hover:brightness-110 active:scale-[0.99] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all-custom flex items-center justify-center gap-2 text-sm sm:text-base">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"></path></svg>
+                        <span>Xác Nhận Bán & Đồng Bộ Sheet</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- 2. FORM NHẬP KHO / THÊM SẢN PHẨM -->
+            <section class="leaf-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center gap-2 border-b border-farm-softgreen pb-3 mb-4">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-farm-deep/10 text-farm-deep font-bold text-sm">2</span>
+                    <h2 class="text-base font-bold text-farm-forest uppercase tracking-wide">Nhập Kho / Thêm Sản Phẩm</h2>
+                </div>
+
+                <form id="addProductForm" class="space-y-3.5">
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-farm-forest/90 mb-1">Tên sản phẩm / Thuốc *</label>
+                            <input type="text" id="addName" placeholder="VD: NPK 20-20-15, Anvil..." required class="w-full bg-white border border-farm-sprout/60 rounded-xl px-3 py-2 text-sm text-farm-forest placeholder:text-farm-forest/30 focus:outline-none focus:ring-2 focus:ring-farm-leaf">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-farm-forest/90 mb-1">Đơn vị *</label>
+                            <select id="addUnit" class="w-full bg-white border border-farm-sprout/60 rounded-xl px-2 py-2 text-sm text-farm-forest focus:outline-none focus:ring-2 focus:ring-farm-leaf">
+                                <option value="Bao">Bao</option>
+                                <option value="Chai">Chai</option>
+                                <option value="Gói">Gói</option>
+                                <option value="Can/Xô">Can/Xô</option>
+                                <option value="Kg">Kg</option>
+                                <option value="Lít">Lít</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-farm-forest/90 mb-1">Số lượng nhập *</label>
+                            <input type="number" id="addQty" min="0" value="10" required class="w-full bg-white border border-farm-sprout/60 rounded-xl px-3 py-2 text-sm text-farm-forest focus:outline-none focus:ring-2 focus:ring-farm-leaf font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-farm-forest/90 mb-1">Giá bán (VNĐ) *</label>
+                            <input type="number" id="addPrice" placeholder="VD: 150000" required class="w-full bg-white border border-farm-sprout/60 rounded-xl px-3 py-2 text-sm text-farm-forest focus:outline-none focus:ring-2 focus:ring-farm-leaf font-bold">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-farm-forest hover:bg-farm-deep active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition-all-custom flex items-center justify-center gap-2 text-sm">
+                        <svg class="w-4 h-4 text-farm-leaf" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <span>Thêm Sản Phẩm (Cần Khóa Admin)</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- 3. BẢNG TỒN KHO HIỆN TẠI -->
+            <section class="leaf-card rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex justify-between items-center border-b border-farm-softgreen pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-farm-leaf/20 text-farm-forest font-bold text-sm">3</span>
+                        <h2 class="text-base font-bold text-farm-forest uppercase tracking-wide">Bảng Tồn Kho</h2>
+                    </div>
+                    <span class="text-[11px] font-semibold text-farm-deep bg-farm-softgreen px-2.5 py-1 rounded-full">Tự động đồng bộ</span>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-farm-softgreen">
+                    <table id="inventoryTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-farm-softgreen/60 text-farm-forest font-bold border-b border-farm-softgreen">
+                                <th class="p-2.5">Mã</th>
+                                <th class="p-2.5">Sản Phẩm</th>
+                                <th class="p-2.5 text-center">ĐVT</th>
+                                <th class="p-2.5 text-center">Tồn</th>
+                                <th class="p-2.5 text-right">Giá</th>
+                                <th class="p-2.5 text-right">Tổng</th>
+                                <th class="p-2.5 text-center">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-farm-softgreen/40 font-medium">
+                            <!-- JS tự độngRender -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. BẢNG LỊCH SỬ BÁN HÀNG -->
+            <section class="leaf-card rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex justify-between items-center border-b border-farm-softgreen pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-farm-earth/10 text-farm-earth font-bold text-sm">4</span>
+                        <h2 class="text-base font-bold text-farm-forest uppercase tracking-wide">Lịch Sử Xuất Đơn</h2>
+                    </div>
+                    <button onclick="confirmClearHistory()" class="bg-farm-earth/10 hover:bg-farm-earth hover:text-white text-farm-earth font-bold px-3 py-1.5 rounded-lg text-xs transition-all-custom flex items-center gap-1 border border-farm-earth/30">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span>Xóa Lịch Sử</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-farm-softgreen">
+                    <table id="historyTable" class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-farm-softgreen/60 text-farm-forest font-bold border-b border-farm-softgreen">
+                                <th class="p-2.5">Thời gian</th>
+                                <th class="p-2.5">Khách</th>
+                                <th class="p-2.5">Sản Phẩm</th>
+                                <th class="p-2.5 text-center">SL</th>
+                                <th class="p-2.5 text-right">Tổng Tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-farm-softgreen/40 font-medium">
+                            <!-- JS tự động Render -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center text-xs text-farm-deep/60 pt-2 font-medium">
+            Phần mềm Quản lý Kho Vật Tư Nông Nghiệp &copy; Phong cách Thiên nhiên Organic
+        </footer>
+    </div>
+
+    <!-- MODAL MẬT KHẨU TỦY CHỈNH THEME THIÊN NHIÊN -->
+    <div id="passwordModal" class="fixed inset-0 bg-farm-forest/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all-custom">
+        <div class="leaf-card w-full max-w-sm rounded-2xl p-5 shadow-2xl border-2 border-farm-leaf transform scale-95 transition-all-custom modal-content">
+            
+            <div class="flex items-center gap-3 mb-3">
+                <div class="p-2.5 bg-farm-softgreen rounded-xl text-farm-forest">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <div>
+                    <h3 id="modalTitle" class="text-base font-extrabold text-farm-forest">Xác Nhận Mật Khẩu</h3>
+                    <p id="modalDesc" class="text-xs text-farm-deep/80 font-medium">Nhập mật khẩu quản trị để tiếp tục</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <input type="password" id="modalPasswordInput" placeholder="Nhập mật khẩu (123456)..." class="w-full bg-farm-sand/50 border border-farm-sprout rounded-xl px-3.5 py-2.5 text-sm font-bold text-farm-forest text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-farm-leaf">
+                    <p id="modalErrorMsg" class="text-[11px] text-farm-alert font-bold mt-1 text-center hidden">Mật khẩu không đúng, vui lòng thử lại!</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="closePasswordModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-3 rounded-xl text-xs transition-all-custom">
+                        Hủy Bỏ
+                    </button>
+                    <button id="modalConfirmBtn" class="w-full bg-farm-forest hover:bg-farm-deep text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow-md transition-all-custom">
+                        Xác Nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxpXXjwBu2jw-JXn686tCI5gpP7z4Okh7H4E35JlBh_C390Bq6c7i0ctbJVJDkVorfVw/exec";
+        const ADMIN_PASSWORD = "123456";
+
+        let inventory = [];
+        let salesHistory = JSON.parse(localStorage.getItem('agri_history')) || [];
+
+        // DOM elements
+        const addProductForm = document.getElementById('addProductForm');
+        const sellForm = document.getElementById('sellForm');
+        const inventoryTable = document.getElementById('inventoryTable').querySelector('tbody');
+        const historyTable = document.getElementById('historyTable').querySelector('tbody');
+        const sellProductSelect = document.getElementById('sellProductSelect');
+        const totalPreview = document.getElementById('totalPreview');
+
+        const statTotalProducts = document.getElementById('statTotalProducts');
+        const statTotalQty = document.getElementById('statTotalQty');
+        const statTotalSales = document.getElementById('statTotalSales');
+
+        const modal = document.getElementById('passwordModal');
+        const modalContent = modal.querySelector('.modal-content');
+        const modalInput = document.getElementById('modalPasswordInput');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalErrorMsg = document.getElementById('modalErrorMsg');
+
+        // Tải dữ liệu từ Google Sheets
+        function loadDataFromGoogleSheets() {
+            fetch(GOOGLE_SCRIPT_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        inventory = data;
+                        updateUI();
+                    }
+                })
+                .catch(err => {
+                    console.error("Không thể tải từ GG Sheet, dùng LocalStorage:", err);
+                    inventory = JSON.parse(localStorage.getItem('agri_stock')) || [];
+                    updateUI();
+                });
+        }
+
+        // Hiện Custom Modal Password
+        function showPasswordModal(title, desc, callback) {
+            modalTitle.textContent = title;
+            modalDesc.textContent = desc;
+            modalInput.value = "";
+            modalErrorMsg.classList.add('hidden');
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+            modalInput.focus();
+
+            const newConfirmBtn = modalConfirmBtn.cloneNode(true);
+            modalConfirmBtn.parentNode.replaceChild(newConfirmBtn, modalConfirmBtn);
+
+            newConfirmBtn.addEventListener('click', function() {
+                if (modalInput.value === ADMIN_PASSWORD) {
+                    closePasswordModal();
+                    callback(true);
+                } else {
+                    modalErrorMsg.classList.remove('hidden');
+                    modalInput.focus();
+                }
+            });
+
+            modalInput.onkeydown = function(e) {
+                if (e.key === 'Enter') newConfirmBtn.click();
+            };
+        }
+
+        function closePasswordModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            modalInput.value = "";
+            modalErrorMsg.classList.add('hidden');
+        }
+
+        // Cập nhật giao diện
+        function updateUI() {
+            inventoryTable.innerHTML = '';
+            sellProductSelect.innerHTML = '<option value="">-- Chọn sản phẩm bán --</option>';
+
+            let totalQtySum = 0;
+
+            if (inventory.length === 0) {
+                inventoryTable.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-farm-deep/50 italic">Kho đang trống</td></tr>`;
+            } else {
+                inventory.forEach((item, index) => {
+                    const qtyNum = Number(item.qty) || 0;
+                    totalQtySum += qtyNum;
+
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-farm-softgreen/30 transition-colors";
+
+                    const isLowStock = qtyNum <= 5;
+                    const stockBadge = isLowStock 
+                        ? `<span class="inline-block px-2 py-0.5 bg-farm-alert/10 text-farm-alert font-bold rounded-md border border-farm-alert/20">${qtyNum}</span>` 
+                        : `<span class="text-farm-deep font-bold">${qtyNum}</span>`;
+
+                    const totalValue = qtyNum * Number(item.price);
+
+                    row.innerHTML = `
+                        <td class="p-2.5 font-mono text-[11px] text-farm-forest/70">${item.id}</td>
+                        <td class="p-2.5 font-bold text-farm-forest">${item.name}</td>
+                        <td class="p-2.5 text-center text-farm-deep/80">${item.unit}</td>
+                        <td class="p-2.5 text-center">${stockBadge}</td>
+                        <td class="p-2.5 text-right font-medium">${Number(item.price).toLocaleString('vi-VN')}đ</td>
+                        <td class="p-2.5 text-right font-bold text-farm-forest">${Number(totalValue).toLocaleString('vi-VN')}đ</td>
+                        <td class="p-2.5 text-center">
+                            <button onclick="requestDeleteProduct(${index})" class="p-1 text-farm-earth hover:text-farm-earth-dark hover:bg-farm-earth/10 rounded-md transition-colors" title="Xóa sản phẩm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </td>
+                    `;
+                    inventoryTable.appendChild(row);
+
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${item.name} (Tồn: ${qtyNum} ${item.unit}) - ${Number(item.price).toLocaleString('vi-VN')}đ`;
+                    sellProductSelect.appendChild(option);
+                });
+            }
+
+            // Thống kê Dashboard
+            statTotalProducts.textContent = inventory.length;
+            statTotalQty.textContent = totalQtySum.toLocaleString('vi-VN');
+            statTotalSales.textContent = salesHistory.length.toLocaleString('vi-VN');
+
+            // Bảng lịch sử
+            historyTable.innerHTML = '';
+            if (salesHistory.length === 0) {
+                historyTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-farm-deep/50 italic">Chưa có giao dịch xuất hàng</td></tr>`;
+            } else {
+                salesHistory.slice().reverse().forEach(record => {
+                    const hRow = document.createElement('tr');
+                    hRow.className = "hover:bg-farm-softgreen/30 transition-colors";
+                    hRow.innerHTML = `
+                        <td class="p-2.5 text-[11px] text-farm-deep/70">${record.time}</td>
+                        <td class="p-2.5 text-farm-forest font-medium">${record.customer}</td>
+                        <td class="p-2.5 font-bold text-farm-forest">${record.productName}</td>
+                        <td class="p-2.5 text-center font-bold">${record.qty} ${record.unit}</td>
+                        <td class="p-2.5 text-right font-black text-farm-earth">${Number(record.totalMoney).toLocaleString('vi-VN')}đ</td>
+                    `;
+                    historyTable.appendChild(hRow);
+                });
+            }
+
+            localStorage.setItem('agri_stock', JSON.stringify(inventory));
+            localStorage.setItem('agri_history', JSON.stringify(salesHistory));
+            calculateTotal();
+        }
+
+        // Xóa sản phẩm trong kho
+        function requestDeleteProduct(index) {
+            showPasswordModal("Xóa Sản Phẩm", "Nhập mật khẩu quản trị để xác nhận xóa:", function() {
+                inventory.splice(index, 1);
+                updateUI();
+                sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+            });
+        }
+
+        // Xóa Lịch sử bán
+        function confirmClearHistory() {
+            if (salesHistory.length === 0) return;
+            showPasswordModal("Xóa Lịch Sử", "Nhập mật khẩu quản trị để xóa toàn bộ đơn bán:", function() {
+                salesHistory = [];
+                localStorage.removeItem('agri_history');
+                updateUI();
+                sendToGoogleSheets({ action: "clearHistory" });
+            });
+        }
+
+        // Đồng bộ dữ liệu GG Sheet
+        function sendToGoogleSheets(payload) {
+            if (!GOOGLE_SCRIPT_URL) return;
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("Lỗi đồng bộ:", err));
+        }
+
+        // Tính preview thành tiền
+        function calculateTotal() {
+            const productIndex = sellProductSelect.value;
+            const sellQty = parseInt(document.getElementById('sellQty').value) || 0;
+
+            if (productIndex === "" || !inventory[productIndex]) {
+                totalPreview.textContent = "0 đ";
+                return;
+            }
+
+            const selectedItem = inventory[productIndex];
+            const total = selectedItem.price * sellQty;
+            totalPreview.textContent = `${total.toLocaleString('vi-VN')} đ`;
+        }
+
+        // Nhập kho / Thêm SP
+        addProductForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            showPasswordModal("Nhập Kho / Thêm SP", "Nhập mật khẩu quản trị để thêm vào kho:", function() {
+                const name = document.getElementById('addName').value.trim();
+                const unit = document.getElementById('addUnit').value;
+                const qty = parseInt(document.getElementById('addQty').value);
+                const price = parseFloat(document.getElementById('addPrice').value);
+
+                const existingProduct = inventory.find(item => item.name.toLowerCase() === name.toLowerCase() && item.unit === unit);
+                if (existingProduct) {
+                    existingProduct.qty += qty;
+                    existingProduct.price = price;
+                } else {
+                    const newId = 'SP' + String(inventory.length + 1).padStart(3, '0');
+                    inventory.push({ id: newId, name, unit, qty, price });
+                }
+
+                updateUI();
+                addProductForm.reset();
+                sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+            });
+        });
+
+        // Bán hàng xuất kho
+        sellForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productIndex = sellProductSelect.value;
+            if (productIndex === "") return;
+
+            const sellQty = parseInt(document.getElementById('sellQty').value);
+            const customer = document.getElementById('customerName').value.trim() || 'Khách lẻ';
+            let selectedItem = inventory[productIndex];
+
+            if (selectedItem.qty < sellQty) {
+                // Thay alert mặc định bằng hiệu ứng nháy đỏ báo lỗi trực tiếp trên giao diện
+                totalPreview.textContent = `Kho chỉ còn ${selectedItem.qty} ${selectedItem.unit}!`;
+                totalPreview.classList.add('text-farm-alert');
+                setTimeout(() => {
+                    totalPreview.classList.remove('text-farm-alert');
+                    calculateTotal();
+                }, 2000);
+                return;
+            }
+
+            selectedItem.qty -= sellQty;
+            const totalMoney = sellQty * selectedItem.price;
+
+            const now = new Date();
+            const timeString = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+            
+            const newSale = {
+                time: timeString,
+                customer: customer,
+                productName: selectedItem.name,
+                unit: selectedItem.unit,
+                qty: sellQty,
+                price: selectedItem.price,
+                totalMoney: totalMoney
+            };
+
+            salesHistory.push(newSale);
+            updateUI();
+
+            sendToGoogleSheets({ action: "addSale", sale: newSale });
+            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+
+            document.getElementById('customerName').value = '';
+            document.getElementById('sellQty').value = 1;
+        });
+
+        // Tải dữ liệu ban đầu
+        loadDataFromGoogleSheets();
+    </script>
 </body>
 </html>
