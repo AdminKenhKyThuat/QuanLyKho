@@ -38,6 +38,30 @@
         .full-width { grid-column: span 1; }
         .total-preview { background: #e8f5e9; padding: 12px; border-radius: 6px; font-size: 1.1rem; color: #1b5e20; font-weight: bold; text-align: right; margin-bottom: 12px; }
 
+        /* Modal Mật Khẩu */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: white; width: 90%; max-width: 400px; padding: 20px;
+            border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            transform: translateY(-20px); transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-box h3 { margin-top: 0; color: #1b5e20; font-size: 1.2rem; margin-bottom: 10px; }
+        .modal-box p { font-size: 0.9rem; color: #555; margin-bottom: 15px; }
+        .modal-box input {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;
+            font-size: 1rem; margin-bottom: 15px; outline: none;
+        }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; font-size: 0.9rem; }
+        .modal-btn-cancel { background: #e0e0e0; color: #333; }
+        .modal-btn-confirm { background: #2e7d32; color: white; }
+
         @media screen and (max-width: 768px) {
             body { padding: 5px; }
             h1 { font-size: 1.25rem; }
@@ -51,7 +75,7 @@
     <h1>QUẢN LÝ KHO & BÁN HÀNG VẬT TƯ</h1>
     
     <div class="grid">
-        <!-- 1. Giao diện Bán Hàng (Đã đưa lên đầu) -->
+        <!-- 1. Giao diện Bán Hàng -->
         <div class="card">
             <div class="card-header">
                 <h2>1. Giao Diện Bán Hàng (Xuất Kho)</h2>
@@ -79,10 +103,10 @@
             </form>
         </div>
 
-        <!-- 2. Form Nhập Sản Phẩm (Đưa xuống dưới) -->
+        <!-- 2. Form Nhập Sản Phẩm -->
         <div class="card">
             <div class="card-header">
-                <h2>2. Thêm Sản Phẩm / Nhập Kho</h2>
+                <h2>2. Thêm Sản Phẩm / Nhập Kho (Yêu cầu mật khẩu)</h2>
             </div>
             <form id="addProductForm">
                 <div class="form-group">
@@ -140,7 +164,7 @@
     <div class="card full-width">
         <div class="card-header">
             <h2>4. Lịch Sử Bán Hàng</h2>
-            <button class="btn-danger" onclick="clearHistory()">Xóa Lịch Sử</button>
+            <button class="btn-danger" onclick="confirmClearHistory()">Xóa Lịch Sử</button>
         </div>
         <div class="table-responsive">
             <table id="historyTable">
@@ -160,15 +184,24 @@
     </div>
 </div>
 
+<!-- Modal Mật Khẩu -->
+<div class="modal-overlay" id="passwordModal">
+    <div class="modal-box">
+        <h3 id="modalTitle">Xác nhận mật khẩu</h3>
+        <p id="modalDesc">Vui lòng nhập mật khẩu quản trị:</p>
+        <input type="password" id="modalPasswordInput" placeholder="Nhập mật khẩu...">
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="closePasswordModal()">Hủy</button>
+            <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmfao-aH6RUm6t-8UBiEWOlDjtixg4TMO_wMBv_8-27yACVDXFZAzM7gXurlLC0nq1AA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxpXXjwBu2jw-JXn686tCI5gpP7z4Okh7H4E35JlBh_C390Bq6c7i0ctbJVJDkVorfVw/exec";
+    const ADMIN_PASSWORD = "123456"; // Mật khẩu quản trị
 
-    let inventory = JSON.parse(localStorage.getItem('agri_stock')) || [
-        { id: 'SP001', name: 'Phân Bón NPK 16-16-8', unit: 'Bao', qty: 50, price: 550000 },
-        { id: 'SP002', name: 'Thuốc BVTV Anvil 250ml', unit: 'Chai', qty: 30, price: 120000 },
-        { id: 'SP003', name: 'Thuốc Trừ Sâu Regent', unit: 'Gói', qty: 100, price: 22000 }
-    ];
-
+    let inventory = [];
     let salesHistory = JSON.parse(localStorage.getItem('agri_history')) || [];
 
     const addProductForm = document.getElementById('addProductForm');
@@ -177,6 +210,59 @@
     const historyTable = document.getElementById('historyTable').querySelector('tbody');
     const sellProductSelect = document.getElementById('sellProductSelect');
     const totalPreview = document.getElementById('totalPreview');
+
+    const modal = document.getElementById('passwordModal');
+    const modalInput = document.getElementById('modalPasswordInput');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+
+    // 🚀 TỰ ĐỘNG KÉO DỮ LIỆU TỪ GOOGLE SHEETS KHI MỞ TRANG (HOST TRÊN GITHUB)
+    function loadDataFromGoogleSheets() {
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    inventory = data;
+                    updateUI();
+                }
+            })
+            .catch(err => {
+                console.error("Không thể tải dữ liệu từ Google Sheets, dùng dữ liệu lưu tạm:", err);
+                inventory = JSON.parse(localStorage.getItem('agri_stock')) || [];
+                updateUI();
+            });
+    }
+
+    function showPasswordModal(title, desc, callback) {
+        modalTitle.textContent = title;
+        modalDesc.textContent = desc;
+        modalInput.value = "";
+        modal.classList.add('active');
+        modalInput.focus();
+
+        const newConfirmBtn = modalConfirmBtn.cloneNode(true);
+        modalConfirmBtn.parentNode.replaceChild(newConfirmBtn, modalConfirmBtn);
+
+        newConfirmBtn.addEventListener('click', function() {
+            if (modalInput.value === ADMIN_PASSWORD) {
+                closePasswordModal();
+                callback(true);
+            } else {
+                alert("Sai mật khẩu quản trị!");
+                modalInput.focus();
+            }
+        });
+
+        modalInput.onkeydown = function(e) {
+            if (e.key === 'Enter') newConfirmBtn.click();
+        };
+    }
+
+    function closePasswordModal() {
+        modal.classList.remove('active');
+        modalInput.value = "";
+    }
 
     function updateUI() {
         inventoryTable.innerHTML = '';
@@ -193,15 +279,15 @@
                     <td><strong>${item.name}</strong></td>
                     <td>${item.unit}</td>
                     <td><strong style="color: ${item.qty <= 5 ? 'red' : 'green'};">${item.qty}</strong></td>
-                    <td>${item.price.toLocaleString('vi-VN')} đ</td>
-                    <td>${totalValue.toLocaleString('vi-VN')} đ</td>
-                    <td><button class="btn-delete-row" onclick="deleteProduct(${index})">Xóa</button></td>
+                    <td>${Number(item.price).toLocaleString('vi-VN')} đ</td>
+                    <td>${Number(totalValue).toLocaleString('vi-VN')} đ</td>
+                    <td><button class="btn-delete-row" onclick="requestDeleteProduct(${index})">Xóa</button></td>
                 `;
                 inventoryTable.appendChild(row);
 
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = `${item.name} (Còn: ${item.qty} ${item.unit}) - Giá: ${item.price.toLocaleString('vi-VN')}đ`;
+                option.textContent = `${item.name} (Còn: ${item.qty} ${item.unit}) - Giá: ${Number(item.price).toLocaleString('vi-VN')}đ`;
                 sellProductSelect.appendChild(option);
             });
         }
@@ -217,8 +303,8 @@
                     <td>${record.customer}</td>
                     <td><strong>${record.productName}</strong></td>
                     <td>${record.qty} ${record.unit}</td>
-                    <td>${record.price.toLocaleString('vi-VN')} đ</td>
-                    <td><strong style="color: #2e7d32;">${record.totalMoney.toLocaleString('vi-VN')} đ</strong></td>
+                    <td>${Number(record.price).toLocaleString('vi-VN')} đ</td>
+                    <td><strong style="color: #2e7d32;">${Number(record.totalMoney).toLocaleString('vi-VN')} đ</strong></td>
                 `;
                 historyTable.appendChild(hRow);
             });
@@ -229,13 +315,28 @@
         calculateTotal();
     }
 
-    function deleteProduct(index) {
-        const productName = inventory[index].name;
-        if (confirm(`Xóa sản phẩm "${productName}" khỏi kho?`)) {
-            inventory.splice(index, 1);
-            updateUI();
-            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
-        }
+    function requestDeleteProduct(index) {
+        showPasswordModal("Xác thực xóa sản phẩm", "Nhập mật khẩu quản trị để xóa sản phẩm này:", function() {
+            const productName = inventory[index].name;
+            if (confirm(`Xóa sản phẩm "${productName}" khỏi kho?`)) {
+                inventory.splice(index, 1);
+                updateUI();
+                sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+                alert('Đã xóa thành công!');
+            }
+        });
+    }
+
+    function confirmClearHistory() {
+        if (salesHistory.length === 0) return;
+        showPasswordModal("Xác thực xóa lịch sử", "Nhập mật khẩu quản trị để xóa toàn bộ lịch sử:", function() {
+            if (confirm('Xóa toàn bộ lịch sử bán hàng?')) {
+                salesHistory = [];
+                localStorage.removeItem('agri_history');
+                updateUI();
+                alert('Đã xóa toàn bộ lịch sử!');
+            }
+        });
     }
 
     function sendToGoogleSheets(payload) {
@@ -246,15 +347,6 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         }).catch(err => console.error("Lỗi đồng bộ:", err));
-    }
-
-    function clearHistory() {
-        if (salesHistory.length === 0) return;
-        if (confirm('Xóa toàn bộ lịch sử bán hàng?')) {
-            salesHistory = [];
-            localStorage.removeItem('agri_history');
-            updateUI();
-        }
     }
 
     function calculateTotal() {
@@ -273,24 +365,26 @@
 
     addProductForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        const name = document.getElementById('addName').value;
-        const unit = document.getElementById('addUnit').value;
-        const qty = parseInt(document.getElementById('addQty').value);
-        const price = parseFloat(document.getElementById('addPrice').value);
+        showPasswordModal("Xác thực nhập kho", "Nhập mật khẩu quản trị để thêm/nhập kho:", function() {
+            const name = document.getElementById('addName').value;
+            const unit = document.getElementById('addUnit').value;
+            const qty = parseInt(document.getElementById('addQty').value);
+            const price = parseFloat(document.getElementById('addPrice').value);
 
-        const existingProduct = inventory.find(item => item.name.toLowerCase() === name.toLowerCase() && item.unit === unit);
-        if (existingProduct) {
-            existingProduct.qty += qty;
-            existingProduct.price = price;
-        } else {
-            const newId = 'SP' + String(inventory.length + 1).padStart(3, '0');
-            inventory.push({ id: newId, name, unit, qty, price });
-        }
+            const existingProduct = inventory.find(item => item.name.toLowerCase() === name.toLowerCase() && item.unit === unit);
+            if (existingProduct) {
+                existingProduct.qty += qty;
+                existingProduct.price = price;
+            } else {
+                const newId = 'SP' + String(inventory.length + 1).padStart(3, '0');
+                inventory.push({ id: newId, name, unit, qty, price });
+            }
 
-        updateUI();
-        addProductForm.reset();
-        sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
-        alert('Đã cập nhật kho thành công!');
+            updateUI();
+            addProductForm.reset();
+            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
+            alert('Đã cập nhật kho thành công!');
+        });
     });
 
     sellForm.addEventListener('submit', function(e) {
@@ -338,7 +432,8 @@
         document.getElementById('sellQty').value = 1;
     });
 
-    updateUI();
+    // Gọi hàm kéo dữ liệu tự động từ Google Sheets ngay khi tải trang GitHub Pages
+    loadDataFromGoogleSheets();
 </script>
 
 </body>
