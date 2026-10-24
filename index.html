@@ -198,7 +198,7 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxpXXjwBu2jw-JXn686tCI5gpP7z4Okh7H4E35JlBh_C390Bq6c7i0ctbJVJDkVorfVw/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmfao-aH6RUm6t-8UBiEWOLDjtixg4TMO_wMBv_8-27yACVDXFZAZM7gXurlLC0nq1AA/exec";
     const ADMIN_PASSWORD = "123456"; // Mật khẩu quản trị
 
     let inventory = [];
@@ -217,7 +217,6 @@
     const modalTitle = document.getElementById('modalTitle');
     const modalDesc = document.getElementById('modalDesc');
 
-    // 🚀 TỰ ĐỘNG KÉO DỮ LIỆU TỪ GOOGLE SHEETS KHI MỞ TRANG (HOST TRÊN GITHUB)
     function loadDataFromGoogleSheets() {
         fetch(GOOGLE_SCRIPT_URL)
             .then(response => response.json())
@@ -317,25 +316,18 @@
 
     function requestDeleteProduct(index) {
         showPasswordModal("Xác thực xóa sản phẩm", "Nhập mật khẩu quản trị để xóa sản phẩm này:", function() {
-            const productName = inventory[index].name;
-            if (confirm(`Xóa sản phẩm "${productName}" khỏi kho?`)) {
-                inventory.splice(index, 1);
-                updateUI();
-                sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
-                alert('Đã xóa thành công!');
-            }
+            inventory.splice(index, 1);
+            updateUI();
+            sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
         });
     }
 
     function confirmClearHistory() {
         if (salesHistory.length === 0) return;
         showPasswordModal("Xác thực xóa lịch sử", "Nhập mật khẩu quản trị để xóa toàn bộ lịch sử:", function() {
-            if (confirm('Xóa toàn bộ lịch sử bán hàng?')) {
-                salesHistory = [];
-                localStorage.removeItem('agri_history');
-                updateUI();
-                alert('Đã xóa toàn bộ lịch sử!');
-            }
+            salesHistory = [];
+            localStorage.removeItem('agri_history');
+            updateUI();
         });
     }
 
@@ -383,7 +375,6 @@
             updateUI();
             addProductForm.reset();
             sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
-            alert('Đã cập nhật kho thành công!');
         });
     });
 
@@ -426,13 +417,10 @@
         sendToGoogleSheets({ action: "addSale", sale: newSale });
         sendToGoogleSheets({ action: "updateInventory", inventory: inventory });
 
-        alert(`Bán thành công! Tổng tiền: ${totalMoney.toLocaleString('vi-VN')} đ`);
-
         document.getElementById('customerName').value = '';
         document.getElementById('sellQty').value = 1;
     });
 
-    // Gọi hàm kéo dữ liệu tự động từ Google Sheets ngay khi tải trang GitHub Pages
     loadDataFromGoogleSheets();
 </script>
 
