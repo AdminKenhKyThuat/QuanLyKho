@@ -7,18 +7,17 @@
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f6f9; margin: 0; padding: 10px; }
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 900px; margin: auto; }
         h1 { color: #2e7d32; text-align: center; margin-bottom: 15px; font-size: 1.5rem; }
         
-        /* Bố cục mặc định trên máy tính: chia 2 cột */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e8f5e9; padding-bottom: 8px; margin-bottom: 12px; }
         .card h2 { color: #1b5e20; margin: 0; font-size: 1.05rem; }
         
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; color: #333; }
-        /* Tăng kích thước input, select trên điện thoại để dễ bấm (tránh bị zoom khi focus trên iOS) */
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         
         .btn { background: #2e7d32; color: white; border: none; padding: 12px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1rem; }
@@ -30,21 +29,17 @@
         .btn-delete-row { background: #e53935; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .btn-delete-row:hover { background: #c62828; }
         
-        /* Tối ưu bảng hiển thị trên di động có thanh cuộn ngang mượt mà */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; white-space: nowrap; }
         th, td { border: 1px solid #e0e0e0; padding: 10px 8px; text-align: left; }
         th { background-color: #e8f5e9; color: #1b5e20; }
         tr:nth-child(even) { background-color: #f9f9f9; }
         
-        .full-width { grid-column: span 2; }
+        .full-width { grid-column: span 1; }
         .total-preview { background: #e8f5e9; padding: 12px; border-radius: 6px; font-size: 1.1rem; color: #1b5e20; font-weight: bold; text-align: right; margin-bottom: 12px; }
 
-        /* 📱 RESPONSIVE CHO ĐIỆN THOẠI (Màn hình dưới 768px) */
         @media screen and (max-width: 768px) {
             body { padding: 5px; }
-            .grid { grid-template-columns: 1fr; gap: 10px; } /* Chuyển thành 1 cột dọc */
-            .full-width { grid-column: span 1; }
             h1 { font-size: 1.25rem; }
             .card { padding: 12px; }
         }
@@ -56,43 +51,10 @@
     <h1>QUẢN LÝ KHO & BÁN HÀNG VẬT TƯ</h1>
     
     <div class="grid">
-        <!-- 1. Form Nhập Sản Phẩm -->
+        <!-- 1. Giao diện Bán Hàng (Đã đưa lên đầu) -->
         <div class="card">
             <div class="card-header">
-                <h2>1. Thêm Sản Phẩm / Nhập Kho</h2>
-            </div>
-            <form id="addProductForm">
-                <div class="form-group">
-                    <label>Tên sản phẩm / Thuốc</label>
-                    <input type="text" id="addName" placeholder="VD: NPK, Anvil..." required>
-                </div>
-                <div class="form-group">
-                    <label>Đơn vị tính</label>
-                    <select id="addUnit">
-                        <option value="Bao">Bao</option>
-                        <option value="Chai">Chai</option>
-                        <option value="Gói">Gói</option>
-                        <option value="Can/Xô">Can / Xô</option>
-                        <option value="Kg">Kg</option>
-                        <option value="Lít">Lít</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Số lượng tồn kho</label>
-                    <input type="number" id="addQty" min="0" value="10" required>
-                </div>
-                <div class="form-group">
-                    <label>Giá bán (VNĐ)</label>
-                    <input type="number" id="addPrice" placeholder="VD: 150000" required>
-                </div>
-                <button type="submit" class="btn">Thêm Vào Kho & Đồng Bộ Sheet</button>
-            </form>
-        </div>
-
-        <!-- 2. Giao diện Bán Hàng -->
-        <div class="card">
-            <div class="card-header">
-                <h2>2. Giao Diện Bán Hàng</h2>
+                <h2>1. Giao Diện Bán Hàng (Xuất Kho)</h2>
             </div>
             <form id="sellForm">
                 <div class="form-group">
@@ -113,7 +75,40 @@
                     Tổng tiền: 0 đ
                 </div>
 
-                <button type="submit" class="btn btn-sell">Bán Hàng & Đẩy Lên Sheet</button>
+                <button type="submit" class="btn btn-sell">Bán Hàng & Đẩy Lên GG Sheet</button>
+            </form>
+        </div>
+
+        <!-- 2. Form Nhập Sản Phẩm (Đưa xuống dưới) -->
+        <div class="card">
+            <div class="card-header">
+                <h2>2. Thêm Sản Phẩm / Nhập Kho</h2>
+            </div>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label>Tên sản phẩm / Thuốc</label>
+                    <input type="text" id="addName" placeholder="VD: NPK 16-16-8, Anvil..." required>
+                </div>
+                <div class="form-group">
+                    <label>Đơn vị tính</label>
+                    <select id="addUnit">
+                        <option value="Bao">Bao</option>
+                        <option value="Chai">Chai</option>
+                        <option value="Gói">Gói</option>
+                        <option value="Can/Xô">Can / Xô</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Lít">Lít</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Số lượng có sẵn (Tồn kho)</label>
+                    <input type="number" id="addQty" min="0" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label>Giá bán (VNĐ)</label>
+                    <input type="number" id="addPrice" placeholder="VD: 150000" required>
+                </div>
+                <button type="submit" class="btn">Thêm Vào Kho & Đồng Bộ GG Sheet</button>
             </form>
         </div>
     </div>
