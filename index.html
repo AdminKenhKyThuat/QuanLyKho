@@ -10,6 +10,26 @@
         .container { max-width: 900px; margin: auto; }
         h1 { color: #2e7d32; text-align: center; margin-bottom: 15px; font-size: 1.5rem; }
         
+        /* 📊 CSS CHO 3 Ô THỐNG KÊ NGANG */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+            border-left: 4px solid #2e7d32;
+        }
+        .stat-card:nth-child(2) { border-left-color: #1976d2; }
+        .stat-card:nth-child(3) { border-left-color: #d32f2f; }
+        .stat-title { font-size: 0.8rem; color: #666; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: #333; }
+
         .grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
         
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
@@ -66,6 +86,10 @@
             body { padding: 5px; }
             h1 { font-size: 1.25rem; }
             .card { padding: 12px; }
+            .dashboard-stats { gap: 6px; }
+            .stat-card { padding: 8px 4px; }
+            .stat-title { font-size: 0.7rem; }
+            .stat-value { font-size: 1rem; }
         }
     </style>
 </head>
@@ -74,6 +98,22 @@
 <div class="container">
     <h1>QUẢN LÝ KHO & BÁN HÀNG VẬT TƯ</h1>
     
+    <!-- 3 Ô THỐNG KÊ NGANG TRÊN CÙNG -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-title">Số Sản Phẩm</div>
+            <div class="stat-value" id="statTotalProducts">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Tổng Tồn Kho</div>
+            <div class="stat-value" id="statTotalQty">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Đơn Đã Bán</div>
+            <div class="stat-value" id="statTotalSales">0</div>
+        </div>
+    </div>
+
     <div class="grid">
         <!-- 1. Giao diện Bán Hàng -->
         <div class="card">
@@ -99,7 +139,7 @@
                     Tổng tiền: 0 đ
                 </div>
 
-                <button type="submit" class="btn btn-sell">Xác nhận Bán</button>
+                <button type="submit" class="btn btn-sell">Bán Hàng & Đẩy Lên GG Sheet</button>
             </form>
         </div>
 
@@ -132,7 +172,7 @@
                     <label>Giá bán (VNĐ)</label>
                     <input type="number" id="addPrice" placeholder="VD: 150000" required>
                 </div>
-                <button type="submit" class="btn">Xác Nhận Thêm Vào Kho</button>
+                <button type="submit" class="btn">Thêm Vào Kho & Đồng Bộ GG Sheet</button>
             </form>
         </div>
     </div>
@@ -199,7 +239,7 @@
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxpXXjwBu2jw-JXn686tCI5gpP7z4Okh7H4E35JlBh_C390Bq6c7i0ctbJVJDkVorfVw/exec";
-    const ADMIN_PASSWORD = "123456"; // Mật khẩu quản trị
+    const ADMIN_PASSWORD = "123456";
 
     let inventory = [];
     let salesHistory = JSON.parse(localStorage.getItem('agri_history')) || [];
@@ -217,6 +257,11 @@
     const modalTitle = document.getElementById('modalTitle');
     const modalDesc = document.getElementById('modalDesc');
 
+    // Các thẻ hiển thị số liệu thống kê
+    const statTotalProducts = document.getElementById('statTotalProducts');
+    const statTotalQty = document.getElementById('statTotalQty');
+    const statTotalSales = document.getElementById('statTotalSales');
+
     function loadDataFromGoogleSheets() {
         fetch(GOOGLE_SCRIPT_URL)
             .then(response => response.json())
@@ -227,7 +272,7 @@
                 }
             })
             .catch(err => {
-                console.error("Không thể tải dữ liệu từ Google Sheets, dùng dữ liệu lưu tạm:", err);
+                console.error("Không thể tải dữ liệu từ Google Sheets:", err);
                 inventory = JSON.parse(localStorage.getItem('agri_stock')) || [];
                 updateUI();
             });
@@ -267,17 +312,22 @@
         inventoryTable.innerHTML = '';
         sellProductSelect.innerHTML = '<option value="">-- Chọn sản phẩm cần bán --</option>';
 
+        let totalQtySum = 0;
+
         if (inventory.length === 0) {
             inventoryTable.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #777;">Kho trống.</td></tr>`;
         } else {
             inventory.forEach((item, index) => {
+                const qtyNum = Number(item.qty) || 0;
+                totalQtySum += qtyNum;
+
                 const row = document.createElement('tr');
-                const totalValue = item.qty * item.price;
+                const totalValue = qtyNum * Number(item.price);
                 row.innerHTML = `
                     <td>${item.id}</td>
                     <td><strong>${item.name}</strong></td>
                     <td>${item.unit}</td>
-                    <td><strong style="color: ${item.qty <= 5 ? 'red' : 'green'};">${item.qty}</strong></td>
+                    <td><strong style="color: ${qtyNum <= 5 ? 'red' : 'green'};">${qtyNum}</strong></td>
                     <td>${Number(item.price).toLocaleString('vi-VN')} đ</td>
                     <td>${Number(totalValue).toLocaleString('vi-VN')} đ</td>
                     <td><button class="btn-delete-row" onclick="requestDeleteProduct(${index})">Xóa</button></td>
@@ -286,10 +336,15 @@
 
                 const option = document.createElement('option');
                 option.value = index;
-                option.textContent = `${item.name} (Còn: ${item.qty} ${item.unit}) - Giá: ${Number(item.price).toLocaleString('vi-VN')}đ`;
+                option.textContent = `${item.name} (Còn: ${qtyNum} ${item.unit}) - Giá: ${Number(item.price).toLocaleString('vi-VN')}đ`;
                 sellProductSelect.appendChild(option);
             });
         }
+
+        // Cập nhật giá trị lên 3 ô thống kê phía trên
+        statTotalProducts.textContent = inventory.length;
+        statTotalQty.textContent = totalQtySum.toLocaleString('vi-VN');
+        statTotalSales.textContent = salesHistory.length.toLocaleString('vi-VN');
 
         historyTable.innerHTML = '';
         if (salesHistory.length === 0) {
@@ -328,6 +383,7 @@
             salesHistory = [];
             localStorage.removeItem('agri_history');
             updateUI();
+            sendToGoogleSheets({ action: "clearHistory" });
         });
     }
 
